@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateEmployeeDto } from '../employees/dto/create-employee.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { User as ReqUser } from './user.decorator';
@@ -11,7 +11,7 @@ export class AuthController {
   constructor(private auth: AuthService) {}
 
   @Post('register')
-  async register(@Body() dto: CreateUserDto) {
+  async register(@Body() dto: CreateEmployeeDto) {
     return this.auth.register(dto);
   }
 
@@ -20,7 +20,7 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { token, user } = await this.auth.login(dto.email, dto.password);
+    const { token, employee } = await this.auth.login(dto.email, dto.password);
 
     // keep cookie (browser-friendly)
     res.cookie('access_token', token, {
@@ -34,7 +34,7 @@ export class AuthController {
     // OPTIONALLY also expose as a header for convenience
     // res.setHeader('Authorization', `Bearer ${token}`);
 
-    return { user, token, message: 'Logged in' }; // 👈 now you’ll see it in Body
+    return { employee, token, message: 'Logged in' }; // 👈 now you'll see it in Body
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,6 +48,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async profile(@ReqUser() user: any) {
-    return { message: 'OK', user };
+    const employee = await this.auth.getProfile(user.sub);
+    return { message: 'OK', employee };
   }
 }

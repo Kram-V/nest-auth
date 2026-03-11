@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prettier --write \"src/**/*.ts\")",
+      "Bash(npx prettier:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

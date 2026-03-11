@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   Patch,
   Post,
@@ -15,6 +16,18 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @Controller('employees')
 export class EmployeesController {
   constructor(private readonly employees: EmployeesService) {}
+
+  // Get All Employees
+  @Get()
+  async findAll() {
+    return this.employees.findAll();
+  }
+
+  // Get Employee by ID
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.employees.findById(id);
+  }
 
   // Add Employee
   @Post()

@@ -1,37 +1,46 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { EmployeesService } from '../employees/employees.service';
+import { CreateEmployeeDto } from '../employees/dto/create-employee.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private users: UsersService,
+    private employees: EmployeesService,
     private jwt: JwtService,
   ) {}
 
-  async register(dto: CreateUserDto) {
-    const user = await this.users.create(dto);
-    return this.buildPublicUser(user);
+  async register(dto: CreateEmployeeDto) {
+    const employee = await this.employees.create(dto);
+    return this.buildPublicEmployee(employee);
   }
 
   async login(email: string, password: string) {
-    const user = await this.users.findByEmail(email);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    const employee = await this.employees.findByEmail(email);
+    if (!employee) throw new UnauthorizedException('Invalid credentials');
 
-    const ok = await bcrypt.compare(password, user.passwordHash);
+    const ok = await bcrypt.compare(password, employee.passwordHash);
     if (!ok) throw new UnauthorizedException('Invalid credentials');
 
     const token = await this.signToken(
-      user.id,
-      user.email,
-      `${user.firstName} ${user.lastName}`,
+      employee.id,
+      employee.email,
+      `${employee.firstName} ${employee.middleName} ${employee.lastName}`,
     );
-    return { token, user: this.buildPublicUser(user) };
+    return { token, employee: this.buildPublicEmployee(employee) };
   }
 
-  async signToken(sub: string, email: string, name: string) {
+  async getProfile(employeeId: string) {
+    const employee = await this.employees.findById(employeeId);
+    return this.buildPublicEmployee(employee);
+  }
+
+  async signToken(
+    sub: string,
+    email: string,
+    name: string,
+  ): Promise<string> {
     return await this.jwt.signAsync(
       { sub, email, name },
       {
@@ -41,8 +50,34 @@ export class AuthService {
     );
   }
 
-  buildPublicUser(user: any) {
-    const { id, email, firstName, lastName, createdAt, updatedAt } = user;
-    return { id, email, firstName, lastName, createdAt, updatedAt };
+  buildPublicEmployee(employee: any) {
+    const {
+      id,
+      email,
+      firstName,
+      middleName,
+      lastName,
+      gender,
+      civilStatus,
+      dateOfBirth,
+      employeeId,
+      role,
+      createdAt,
+      updatedAt,
+    } = employee;
+    return {
+      id,
+      email,
+      firstName,
+      middleName,
+      lastName,
+      gender,
+      civilStatus,
+      dateOfBirth,
+      employeeId,
+      role,
+      createdAt,
+      updatedAt,
+    };
   }
 }

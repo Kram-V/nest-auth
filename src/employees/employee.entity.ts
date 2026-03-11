@@ -7,7 +7,8 @@ import {
   Index,
 } from 'typeorm';
 
-export type EmploymentStatus = 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE';
+export type Gender = 'Male' | 'Female';
+export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';
 
 @Entity('employees')
 export class Employee {
@@ -15,26 +16,36 @@ export class Employee {
   id: string;
 
   @Index({ unique: true })
-  @Column({ length: 255 })
+  @Column({ length: 255, nullable: true })
   email: string;
 
-  @Column({ length: 120 })
+  @Column({ length: 120, nullable: true })
   firstName: string;
 
-  @Column({ length: 120 })
+  @Column({ length: 120, nullable: true, default: '' })
+  middleName: string;
+
+  @Column({ length: 120, nullable: true })
   lastName: string;
 
-  @Column({ length: 160, nullable: true })
-  position?: string;
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  gender: Gender;
 
-  @Column({ length: 160, nullable: true })
-  department?: string;
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  civilStatus: CivilStatus;
 
   @Column({ type: 'date', nullable: true })
-  hireDate?: string; // YYYY-MM-DD
+  dateOfBirth: string; // YYYY-MM-DD
 
-  @Column({ type: 'varchar', length: 20, default: 'ACTIVE' })
-  status: EmploymentStatus;
+  @Index({ unique: true })
+  @Column({ length: 50, nullable: true })
+  employeeId: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  passwordHash: string;
+
+  @Column({ type: 'varchar', length: 50, default: 'employee' })
+  role: string;
 
   @CreateDateColumn()
   createdAt: Date;
